@@ -130,3 +130,32 @@ public:
         cout << "----------------------------\n" << endl;
     }
 };
+
+int main() {
+    LostAndFoundSystem campusSystem;
+    int choice;
+
+    do {
+        cout << "========================================" << endl;
+        cout << " Smart Campus Lost & Found System" << endl;
+        cout << "========================================" << endl;
+        cout << "1. Report a Lost Item" << endl;
+        cout << "2. Report a Found Item" << endl;
+        cout << "3. Search for an Item" << endl;
+        cout << "4. View All Items" << endl;
+        cout << "5. Exit System" << endl;
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1: campusSystem.reportItem("Lost"); break;
+            case 2: campusSystem.reportItem("Found"); break;
+            case 3: campusSystem.searchItem(); break;
+            case 4: campusSystem.displayAllItems(); break;
+            case 5: cout << "Saving data and exiting..." << endl; break;
+            default: cout << "Invalid choice." << endl;
+        }
+    } while (choice != 5);
+
+    return 0;
+}
