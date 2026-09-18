@@ -1,3 +1,4 @@
+//user interface and overall architecture.
 #include <iostream>
 #include <string>
 #include <cstring>
