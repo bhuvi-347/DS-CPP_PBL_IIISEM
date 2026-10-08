@@ -22,15 +22,12 @@ The proposed system aims to provide a centralized and organized way to manage lo
 #### Data Structures in C:
 - Linked Lists
 - Stacks
-- Queues
-- Searching
-- Sorting
 
 #### Object-Oriented Programming in C++:
 - Classes
 - Objects
 - Encapsulation
-- Inheritance
+  
 
 ### Development Approach:
 
