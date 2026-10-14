@@ -37,7 +37,7 @@ File handling will be used to store records, while Data Structures and OOP conce
 
 ### Team:
 
-**Team T253 – 3BackLog**
+**Team T253 – Ctrl-Z**
 
 - Bhavini Vats – Team Lead
 - Aaditya Singh
@@ -46,3 +46,4 @@ File handling will be used to store records, while Data Structures and OOP conce
 ### Project Status:
 
 **Phase I – Planning & Proposal**
+**Phase II - Development & Implementation**
