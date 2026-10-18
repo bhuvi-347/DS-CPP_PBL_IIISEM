@@ -1,6 +1,11 @@
 #include <iostream>
-#include <string>
 #include <cstring>
+#include <windows.h>
+#include <commdlg.h>
+#include <direct.h>
+#include <fstream>
+#include <ctime>
+#include <shellapi.h>
 
 using namespace std;
 
@@ -11,6 +16,7 @@ extern "C" {
         char date[20];
         char status[10];
         char contact[50];
+        char imagePath[200];
     } Item;
 
     typedef struct Node {
@@ -24,6 +30,113 @@ extern "C" {
     void freeList();
     void saveDatabaseC(const char* filename);
     void loadDatabaseC(const char* filename);
+}
+
+bool selectAndCopyImage(char* destinationPath, int destinationSize) {
+    char sourcePath[MAX_PATH] = "";
+
+    OPENFILENAMEA ofn = {};
+    ofn.lStructSize = sizeof(ofn);
+    ofn.lpstrFile = sourcePath;
+    ofn.nMaxFile = MAX_PATH;
+    ofn.lpstrFilter =
+        "Image Files\0*.jpg;*.jpeg;*.png;*.bmp;*.gif\0"
+        "All Files\0*.*\0";
+    ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+    if (!GetOpenFileNameA(&ofn)) {
+        cout << "File picker cancelled or failed. Error: "
+             << CommDlgExtendedError() << endl;
+        return false;
+    }
+
+    // Find the directory where the program is running
+    char currentDir[MAX_PATH];
+    if (GetCurrentDirectoryA(MAX_PATH, currentDir) == 0) {
+        cout << "Cannot get current directory." << endl;
+        return false;
+    }
+
+    cout << "Program working directory: " << currentDir << endl;
+
+    // Build the images folder path
+    char folderPath[MAX_PATH];
+    sprintf(folderPath, "%s\\images", currentDir);
+
+    // Create the folder; allow it to already exist
+    if (_mkdir(folderPath) != 0 && errno != EEXIST) {
+        cout << "Cannot create folder: " << folderPath << endl;
+        perror("mkdir");
+        return false;
+    }
+
+    // Get extension
+    const char* extension = strrchr(sourcePath, '.');
+    if (extension == NULL) {
+        cout << "Invalid image filename." << endl;
+        return false;
+    }
+
+    // Generate a filename
+    char fileName[100];
+    sprintf(fileName, "item_%lld%s", (long long)time(NULL), extension);
+
+    // Build full destination path
+    char fullDestination[MAX_PATH];
+    sprintf(fullDestination, "%s\\%s", folderPath, fileName);
+
+    // Copy the image
+    ifstream source(sourcePath, ios::binary);
+    if (!source) {
+        cout << "Cannot read selected image: " << sourcePath << endl;
+        return false;
+    }
+
+    ofstream destination(fullDestination, ios::binary);
+    if (!destination) {
+        cout << "Cannot create image file: " << fullDestination << endl;
+        return false;
+    }
+
+    destination << source.rdbuf();
+
+    source.close();
+    destination.close();
+
+    // Verify destination exists
+    if (GetFileAttributesA(fullDestination) == INVALID_FILE_ATTRIBUTES) {
+        cout << "Copy failed. File not found: " << fullDestination << endl;
+        return false;
+    }
+
+    // Store path in the Item
+    strncpy(destinationPath, fullDestination, destinationSize - 1);
+    destinationPath[destinationSize - 1] = '\0';
+
+    cout << "\nImage copied successfully!" << endl;
+    cout << "Saved location: " << fullDestination << endl;
+
+    return true;
+}
+
+void viewImage(const char* imagePath) {
+    if (strcmp(imagePath, "No image") == 0) {
+        cout << "No image available for this item." << endl;
+        return;
+    }
+
+    HINSTANCE result = ShellExecuteA(
+        NULL,
+        "open",
+        imagePath,
+        NULL,
+        NULL,
+        SW_SHOWNORMAL
+    );
+
+    if ((INT_PTR)result <= 32) {
+        cout << "Unable to open the image." << endl;
+    }
 }
 
 class LostAndFoundSystem {
@@ -81,8 +194,16 @@ public:
         cout << "Enter Your Contact Info (Phone/Email): ";
         cin.getline(newItem.contact, 50);
 
+        cout << "\nSelect an image of the item..." << endl;
+
+        if (!selectAndCopyImage(newItem.imagePath, 200)) {
+            strcpy(newItem.imagePath, "No image");
+        }
+
         insertNode(newItem);
         cout << "\nItem successfully registered as " << status << "!" << endl;
+
+        cout << "Image: " << newItem.imagePath << endl;
         
         checkMatch(newItem);
     }
@@ -105,6 +226,17 @@ public:
                      << temp->data.name << " | Category: " << temp->data.category 
                      << " | Date: " << temp->data.date 
                      << " | Contact: " << temp->data.contact << endl;
+                cout << "Image: " << temp->data.imagePath << endl;
+                char viewChoice;
+
+                cout << "View image? (Y/N): ";
+                cin >> viewChoice;
+
+                if (viewChoice == 'Y' || viewChoice == 'y') {
+                    viewImage(temp->data.imagePath);
+                }
+
+                cout << endl;     
                 found = true;
             }
             temp = temp->next;
@@ -125,6 +257,7 @@ public:
             cout << "[" << temp->data.status << "] " 
                  << temp->data.name << " (" << temp->data.category << ") - " 
                  << temp->data.date << endl;
+            cout << "Image: " << temp->data.imagePath << endl;     
             temp = temp->next;
         }
         cout << "----------------------------\n" << endl;

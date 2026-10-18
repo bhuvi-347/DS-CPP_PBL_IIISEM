@@ -8,6 +8,7 @@ typedef struct {
     char date[20];
     char status[10];
     char contact[50];
+    char imagePath[200];
 } Item;
 
 typedef struct Node {
