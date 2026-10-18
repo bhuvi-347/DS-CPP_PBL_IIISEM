@@ -1,68 +1,183 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
+#include "item.h"
 
-typedef struct {
-    char name[50];
-    char category[30];
-    char date[20];
-    char status[10];
-    char contact[50];
-} Item;
+static Node* head = NULL;
+static Node* tail = NULL;
 
-typedef struct Node {
-    Item data;
-    struct Node* next;
-} Node;
+static int sameItem(const Item* a, const Item* b)
+{
+    return strcmp(a->name, b->name) == 0 &&
+           strcmp(a->category, b->category) == 0 &&
+           strcmp(a->date, b->date) == 0 &&
+           strcmp(a->status, b->status) == 0 &&
+           strcmp(a->contact, b->contact) == 0;
+}
 
-Node* head = NULL;
-
-void initList() {
+void initList(void)
+{
     head = NULL;
+    tail = NULL;
 }
 
-void insertNode(Item newItem) {
-    Node* newNode = (Node*)malloc(sizeof(Node));
-    if (newNode == NULL) return; 
+int insertNode(Item newItem)
+{
+    Node* n = (Node*)malloc(sizeof(Node));
+    if (n == NULL) return 0;
 
-    newNode->data = newItem;
-    newNode->next = head;
-    head = newNode;
+    n->data = newItem;
+    n->next = head;
+    head = n;
+    if (tail == NULL) tail = n;
+    return 1;
 }
 
-Node* getHead() {
+static int appendNode(Item it)
+{
+    Node* n = (Node*)malloc(sizeof(Node));
+    if (n == NULL) return 0;
+
+    n->data = it;
+    n->next = NULL;
+    if (tail != NULL) tail->next = n;
+    else head = n;
+    tail = n;
+    return 1;
+}
+
+Node* getHead(void)
+{
     return head;
 }
 
-void freeList() {
-    Node* current = head;
-    while (current != NULL) {
-        Node* nextNode = current->next;
-        free(current);
-        current = nextNode;
+Node* findNode(const Item* key)
+{
+    Node* cur = head;
+    while (cur != NULL)
+    {
+        if (sameItem(&cur->data, key)) return cur;
+        cur = cur->next;
+    }
+    return NULL;
+}
+
+int removeNode(const Item* key)
+{
+    Node* prev = NULL;
+    Node* cur = head;
+    while (cur != NULL)
+    {
+        if (sameItem(&cur->data, key))
+        {
+            if (prev != NULL) prev->next = cur->next;
+            else head = cur->next;
+            if (cur == tail) tail = prev;
+            free(cur);
+            return 1;
+        }
+        prev = cur;
+        cur = cur->next;
+    }
+    return 0;
+}
+
+void freeList(void)
+{
+    Node* cur = head;
+    while (cur != NULL)
+    {
+        Node* next = cur->next;
+        free(cur);
+        cur = next;
     }
     head = NULL;
+    tail = NULL;
 }
 
-void saveDatabaseC(const char* filename) {
-    FILE* file = fopen(filename, "wb");
-    if (file == NULL) return;
+int saveDatabaseC(const char* filename)
+{
+    FILE* f = fopen(filename, "wb");
+    if (f == NULL) return 0;
 
-    Node* current = head;
-    while (current != NULL) {
-        fwrite(&(current->data), sizeof(Item), 1, file);
-        current = current->next;
+    Node* cur = head;
+    while (cur != NULL)
+    {
+        if (fwrite(&cur->data, sizeof(Item), 1, f) != 1)
+        {
+            fclose(f);
+            return 0;
+        }
+        cur = cur->next;
     }
-    fclose(file);
+    return fclose(f) == 0;
 }
 
-void loadDatabaseC(const char* filename) {
-    FILE* file = fopen(filename, "rb");
-    if (file == NULL) return;
+int loadDatabaseC(const char* filename)
+{
+    FILE* f = fopen(filename, "rb");
+    if (f == NULL) return -1;
 
-    Item loadedItem;
-    while (fread(&loadedItem, sizeof(Item), 1, file) == 1) {
-        insertNode(loadedItem);
+    freeList();
+
+    Item it;
+    int count = 0;
+    while (fread(&it, sizeof(Item), 1, f) == 1)
+    {
+        it.name[sizeof it.name - 1] = '\0';
+        it.category[sizeof it.category - 1] = '\0';
+        it.date[sizeof it.date - 1] = '\0';
+        it.status[sizeof it.status - 1] = '\0';
+        it.contact[sizeof it.contact - 1] = '\0';
+
+        if (!appendNode(it)) break;
+        count++;
     }
-    fclose(file);
+    fclose(f);
+    return count;
+}
+
+typedef struct StackNode
+{
+    Action action;
+    struct StackNode* below;
+} StackNode;
+
+static StackNode* top = NULL;
+static int stackCount = 0;
+
+int pushAction(ActionType type, const Item* item)
+{
+    StackNode* s = (StackNode*)malloc(sizeof(StackNode));
+    if (s == NULL) return 0;
+
+    s->action.type = type;
+    s->action.item = *item;
+    s->below = top;
+    top = s;
+    stackCount++;
+    return 1;
+}
+
+int popAction(Action* out)
+{
+    if (top == NULL) return 0;
+
+    StackNode* s = top;
+    *out = s->action;
+    top = s->below;
+    free(s);
+    stackCount--;
+    return 1;
+}
+
+int stackSize(void)
+{
+    return stackCount;
+}
+
+void clearStack(void)
+{
+    Action dummy;
+    while (popAction(&dummy)) { }
 }
