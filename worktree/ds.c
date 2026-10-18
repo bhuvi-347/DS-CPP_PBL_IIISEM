@@ -2,7 +2,8 @@
 #include <string.h>
 #include <stdio.h>
 
-typedef struct {
+typedef struct
+{
     char name[50];
     char category[30];
     char date[20];
@@ -11,18 +12,21 @@ typedef struct {
     char imagePath[200];
 } Item;
 
-typedef struct Node {
+typedef struct Node
+{
     Item data;
     struct Node* next;
 } Node;
 
 Node* head = NULL;
 
-void initList() {
+void initList()
+{
     head = NULL;
 }
 
-void insertNode(Item newItem) {
+void insertNode(Item newItem)
+{
     Node* newNode = (Node*)malloc(sizeof(Node));
     if (newNode == NULL) return; 
 
@@ -31,13 +35,16 @@ void insertNode(Item newItem) {
     head = newNode;
 }
 
-Node* getHead() {
+Node* getHead()
+{
     return head;
 }
 
-void freeList() {
+void freeList()
+{
     Node* current = head;
-    while (current != NULL) {
+    while (current != NULL)
+    {
         Node* nextNode = current->next;
         free(current);
         current = nextNode;
@@ -45,24 +52,28 @@ void freeList() {
     head = NULL;
 }
 
-void saveDatabaseC(const char* filename) {
+void saveDatabaseC(const char* filename)
+{
     FILE* file = fopen(filename, "wb");
     if (file == NULL) return;
 
     Node* current = head;
-    while (current != NULL) {
+    while (current != NULL)
+    {
         fwrite(&(current->data), sizeof(Item), 1, file);
         current = current->next;
     }
     fclose(file);
 }
 
-void loadDatabaseC(const char* filename) {
+void loadDatabaseC(const char* filename)
+{
     FILE* file = fopen(filename, "rb");
     if (file == NULL) return;
 
     Item loadedItem;
-    while (fread(&loadedItem, sizeof(Item), 1, file) == 1) {
+    while (fread(&loadedItem, sizeof(Item), 1, file) == 1)
+    {
         insertNode(loadedItem);
     }
     fclose(file);
