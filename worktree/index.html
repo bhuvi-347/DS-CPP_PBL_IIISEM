@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Lost & Found</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    <h2>🎒 Campus Lost & Found</h2>
+
+    <nav>
+        <a href="#home">Home</a>
+        <a href="#report">Report</a>
+        <a href="#items">Items</a>
+    </nav>
+</header>
+
+<section class="hero" id="home">
+    <h1>Lost Something on Campus?</h1>
+    <p>Don't worry! Report, search and reconnect with your belongings.</p>
+
+    <button onclick="showForm('Lost')">Report Lost Item</button>
+    <button class="found-btn" onclick="showForm('Found')">Report Found Item</button>
+</section>
+
+<div class="container">
+
+    <div class="stats">
+        <div class="stat-card">
+            <h2 id="totalCount">0</h2>
+            <p>Total Items</p>
+        </div>
+
+        <div class="stat-card">
+            <h2 id="lostCount">0</h2>
+            <p>Lost Items</p>
+        </div>
+
+        <div class="stat-card">
+            <h2 id="foundCount">0</h2>
+            <p>Found Items</p>
+        </div>
+    </div>
+
+    <h2 class="section-title">Report an Item</h2>
+
+    <section class="form-section hidden" id="report">
+
+        <h2 id="formTitle">Report Item</h2>
+
+        <form id="itemForm">
+
+            <label>Item Name</label>
+            <input type="text" id="name"
+                placeholder="e.g. Samsung Earbuds" required>
+
+            <label>Category</label>
+            <select id="category" required>
+                <option value="">Select Category</option>
+                <option>Electronics</option>
+                <option>ID Cards</option>
+                <option>Books</option>
+                <option>Bags</option>
+                <option>Clothing</option>
+                <option>Accessories</option>
+                <option>Other</option>
+            </select>
+
+            <label>Date</label>
+            <input type="date" id="date" required>
+
+            <label>Contact Information</label>
+            <input type="text" id="contact"
+                placeholder="Phone or Email" required>
+
+            <label>Upload Item Image</label>
+            <input type="file" id="image" accept="image/*">
+
+            <button type="submit">Submit Report</button>
+
+            <button type="button" class="cancel-btn"
+                onclick="hideForm()">Cancel</button>
+
+        </form>
+    </section>
+
+    <h2 class="section-title" id="items">Search Items</h2>
+
+    <input type="text" id="search"
+        placeholder="Search by item name or category...">
+
+    <h2 class="section-title">All Registered Items</h2>
+
+    <div class="items" id="itemList"></div>
+
+</div>
+
+<footer>
+    <p>Smart Campus Lost & Found System</p>
+    <p>Helping students find what they have lost.</p>
+</footer>
+
+<script src="script.js"></script>
+
+</body>
+</html>
