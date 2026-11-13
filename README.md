@@ -20,13 +20,18 @@ The proposed system aims to provide a centralized and organized way to manage lo
 ### Concepts Used:
 
 #### Data Structures in C:
-- Linked Lists
-- Stacks
+- Singly Linked Lists
+- Structure
+- Dynamic Memory Allocation
+- Pointers
+- File Handling
 
 #### Object-Oriented Programming in C++:
 - Classes
 - Objects
 - Encapsulation
+- Constructor
+- Destructor
   
 
 ### Development Approach:
