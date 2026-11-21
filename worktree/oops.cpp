@@ -9,31 +9,11 @@
 #include <shellapi.h>
 #include <cerrno>
 #include <cstdio>
+#include "ds.h"
 
 using namespace std;
 
-extern "C" {
-    typedef struct {
-        char name[50];
-        char category[30];
-        char date[20];
-        char status[10];
-        char contact[50];
-        char imagePath[200];
-    } Item;
 
-    typedef struct Node {
-        Item data;
-        struct Node* next;
-    } Node;
-
-    void initList();
-    void insertNode(Item newItem);
-    Node* getHead();
-    void freeList();
-    void saveDatabaseC(const char* filename);
-    void loadDatabaseC(const char* filename);
-}
 
 bool selectAndCopyImage(char* destinationPath, int destinationSize) {
     char sourcePath[MAX_PATH] = "";
@@ -138,10 +118,13 @@ private:
     const char* dbFile = "campus_items.dat";
 
     void checkMatch(Item newlyReported) {
-        Node* temp = getHead();
+        
         bool matchFound = false;
         
         cout << "\n--- Smart Matching System ---" << endl;
+        for (int i = 0; i < getTableSize(); i++)
+        {
+        Node* temp = getBucketHead(i);
         while (temp != nullptr) {
             if (strcmp(temp->data.status, newlyReported.status) != 0) {
                 if (strstr(temp->data.name, newlyReported.name) != nullptr || 
@@ -155,6 +138,7 @@ private:
                 }
             }
             temp = temp->next;
+        }
         }
         if (!matchFound) cout << "No immediate matches found in the system." << endl;
         cout << "-----------------------------\n" << endl;
@@ -172,7 +156,7 @@ public:
     }
 
     void reportItem(const char* status) {
-        Item newItem;
+        Item newItem = {};
         strcpy(newItem.status, status);
         
         cin.ignore();
@@ -209,10 +193,13 @@ public:
         cout << "Enter keyword to search (Name or Category): ";
         cin.getline(searchKeyword, 50);
 
-        Node* temp = getHead();
+        
         bool found = false;
         
         cout << "\n--- Search Results ---" << endl;
+        for (int i = 0; i < getTableSize(); i++)
+        {
+        Node* temp = getBucketHead(i);
         while (temp != nullptr) {
             if (strstr(temp->data.name, searchKeyword) != nullptr || 
                 strstr(temp->data.category, searchKeyword) != nullptr) {
@@ -236,27 +223,43 @@ public:
             }
             temp = temp->next;
         }
+    }
         if (!found) cout << "No items match your search." << endl;
         cout << "----------------------\n" << endl;
     }
 
-    void displayAllItems() {
-        Node* temp = getHead();
-        if (temp == nullptr) {
-            cout << "\nThe database is currently empty.\n" << endl;
-            return;
-        }
+    void displayAllItems()
+{
+    bool found = false;
 
-        cout << "\n--- All Registered Items ---" << endl;
-        while (temp != nullptr) {
-            cout << "[" << temp->data.status << "] " 
-                 << temp->data.name << " (" << temp->data.category << ") - " 
+    cout << "\n--- All Registered Items ---" << endl;
+
+    for (int i = 0; i < getTableSize(); i++)
+    {
+        Node* temp = getBucketHead(i);
+
+        while (temp != NULL)
+        {
+            cout << "[" << temp->data.status << "] "
+                 << temp->data.name << " (" << temp->data.category << ") - "
                  << temp->data.date << endl;
-            cout << "Image: " << temp->data.imagePath << endl;     
+
+            cout << "Image: " << temp->data.imagePath << endl;
+            cout << "Contact: " << temp->data.contact << endl;
+
+            found = true;
+
             temp = temp->next;
         }
-        cout << "----------------------------\n" << endl;
     }
+
+    if (!found)
+    {
+        cout << "The database is currently empty." << endl;
+    }
+
+    cout << "----------------------------\n" << endl;
+}
 };
 
 int main() {
