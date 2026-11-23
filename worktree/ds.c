@@ -28,8 +28,7 @@ static unsigned int hashFunction(const char *name)
 
     while (*name != '\0')
     {
-        hash = (hash * 31u + (unsigned char)*name)
-               % TABLE_SIZE;
+        hash = (hash * 31u + (unsigned char)*name) % TABLE_SIZE;
         name++;
     }
 
@@ -146,8 +145,7 @@ void saveDatabaseC(const char *filename)
 
         while (current != NULL)
         {
-            if (fwrite(&current->data,
-                       sizeof(Item), 1, file) != 1)
+            if (fwrite(&current->data, sizeof(Item), 1, file) != 1)
             {
                 printf("Error writing item!\n");
                 fclose(file);
