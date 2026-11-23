@@ -13,13 +13,14 @@ typedef struct
     char status[10];
     char contact[50];
     char imagePath[200];
-}Item;
+} Item;
 
 typedef struct Node
 {
     Item data;
     struct Node *next;
-}Node;
+} Node;
+
 void initList(void);
 void insertNode(Item newItem);
 Node *getBucketHead(int index);
@@ -28,6 +29,7 @@ Node *searchItem(const char *name);
 void freeList(void);
 void saveDatabaseC(const char *filename);
 void loadDatabaseC(const char *filename);
+
 #ifdef __cplusplus
 }
 #endif
